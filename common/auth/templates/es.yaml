@@ -1,0 +1,29 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ClusterSecretStore
+metadata:
+  name: {{ include "common-auth.fullname" . }}-css
+spec:
+  provider:
+    aws:
+      service: SecretsManager
+      region: {{ .Values.region }}
+  conditions:
+    - namespaces:
+        - auth
+        - mall
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: {{ include "common-auth.fullname" . }}-es
+spec:
+  refreshInterval: 1m
+  secretStoreRef:
+    name: {{ include "common-auth.fullname" . }}-css
+    kind: ClusterSecretStore
+  target:
+    name: {{ include "common-auth.fullname" . }}
+    creationPolicy: Owner
+  dataFrom:
+    - extract:
+        key: {{ .Values.secretManagerName }}

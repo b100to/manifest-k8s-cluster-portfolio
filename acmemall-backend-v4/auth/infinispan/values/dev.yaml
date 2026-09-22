@@ -1,0 +1,6 @@
+replicaCount: 1
+
+image:
+  repository: 111111111111.dkr.ecr.ap-northeast-2.amazonaws.com/acme-auth/dev/infinispan
+  pullPolicy: IfNotPresent
+  tag: ""

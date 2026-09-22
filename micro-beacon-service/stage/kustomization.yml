@@ -1,0 +1,11 @@
+resources:
+- deployment.yml
+- service.yml
+apiVersion: kustomize.config.k8s.io/v1beta1
+# namespace: health
+kind: Kustomization
+images:
+- name: /
+  newTag: "25"
+- name: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/micro-beacon-service-stage
+  newTag: "141"

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-studio-fastapi-dev
+  labels:
+    app.kubernetes.io/name: ai-studio-fastapi-dev
+spec:
+  ports:
+    - port: 8080
+      name: http
+      targetPort: 8080
+      nodePort: 30039
+  selector:
+    app.kubernetes.io/name: ai-studio-fastapi-dev
+  type: NodePort

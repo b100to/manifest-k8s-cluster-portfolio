@@ -1,0 +1,11 @@
+{{- if .Values.irsa.enabled -}}
+apiVersion: iam.services.k8s.aws/v1alpha1
+kind: Role
+metadata:
+  name: {{ include "acmemall-backend-v4.fullname" . }}
+spec:
+  name: {{ include "acmemall-backend-v4.fullname" . }}
+  policies: {{- toYaml .Values.irsa.policies | nindent 4 }}
+  assumeRolePolicyDocument: {{ .Values.irsa.assumeRolePolicyDocument | toJson | quote }}
+  tags: {{- toYaml .Values.irsa.tags | nindent 4 }}
+{{- end }}

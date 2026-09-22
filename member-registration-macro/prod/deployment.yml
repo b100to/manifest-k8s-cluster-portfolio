@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: member-registration-macro-prod
+spec:
+  replicas: 0
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: member-registration-macro-prod
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: member-registration-macro-prod
+        version: v1.0
+        app.kubernetes.io/name: member-registration-macro-prod
+    spec:
+      containers:
+        - name: app
+          image: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/member-registration-macro-prod
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "768Mi"
+          ports:
+            - containerPort: 80
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: partner-secret
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: partner-secret
+                  key: AWS_SECRET_ACCESS_KEY

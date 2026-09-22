@@ -1,0 +1,163 @@
+---
+env: prod
+replicaCount: 4
+
+image:
+  name: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/acmemall-backend-v4/prd/api
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::222222222222:role/acmemall-backend-v4-api
+
+podAnnotations:
+  admission.datadoghq.com/java-lib.version: "v1.18.2"
+
+podSecurityContext:
+  {}
+  # fsGroup: 2000
+
+securityContext:
+  {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: NodePort
+  port: 8080
+  nodePort: 30002
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources:
+  limits:
+    cpu: 3.0
+    memory: 3Gi
+  requests:
+    cpu: 3.0
+    memory: 3Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 4
+  maxReplicas: 100
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations:
+  - key: node-group-type
+    operator: Equal
+    value: mall-v4
+    effect: NoSchedule
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: node-group-type
+              operator: In
+              values:
+                - mall-v4
+
+acmemall-backend-v4:
+  fullname: acmemall-backend-v4-api
+  labels:
+    app.kubernetes.io/name: acmemall-backend-v4
+    app.kubernetes.io/version: 0.1.0
+    app.kubernetes.io/component: spring
+    app.kubernetes.io/part-of: acmemall
+    app.kubernetes.io/managed-by: helm
+  selectorLabels:
+    app.kubernetes.io/name: acmemall-backend-v4
+
+irsa:
+  enabled: true
+  policies:
+    - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+    - arn:aws:iam::aws:policy/SecretsManagerReadWrite
+  assumeRolePolicyDocument:
+    {
+      "Version": "2012-10-17",
+      "Statement":
+        [
+          {
+            "Effect": "Allow",
+            "Principal":
+              {
+                "Federated": "arn:aws:iam::222222222222:oidc-provider/oidc.eks.ap-northeast-2.amazonaws.com/id/00000000000000000000000000000002",
+              },
+            "Action": "sts:AssumeRoleWithWebIdentity",
+            "Condition":
+              {
+                "StringEquals":
+                  {
+                    "oidc.eks.ap-northeast-2.amazonaws.com/id/00000000000000000000000000000002:aud": "sts.amazonaws.com",
+                    "oidc.eks.ap-northeast-2.amazonaws.com/id/00000000000000000000000000000002:sub": "system:serviceaccount:mall:acmemall-backend-v4",
+                  },
+              },
+          },
+        ],
+    }
+  tags:
+    - key: cluster-name
+      value: mall-prod-1
+    - key: namespace
+      value: mall
+    - key: iamserviceaccount-name
+      value: mall/acmemall-backend-v4
+
+istio:
+  enabled: true
+  gateway:
+    enabled: false
+    name: acmemall-backend-v4
+    hosts:
+      - api-v4.acme.example
+  virtualservice:
+    prefix: /
+    hosts:
+      - api-v4.acme.example
+
+## mall-v4 pod extra options for liveness and readiness probes
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes
+livenessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 15
+  timeoutSeconds: 1
+  failureThreshold: 3
+  successThreshold: 1
+readinessProbe:
+  enabled: true
+  initialDelaySeconds: 5
+  periodSeconds: 15
+  timeoutSeconds: 1
+  failureThreshold: 3
+  successThreshold: 1
+startupProbe:
+  enabled: true
+  periodSeconds: 10
+  failureThreshold: 30

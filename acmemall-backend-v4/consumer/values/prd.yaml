@@ -1,0 +1,14 @@
+env: prod
+replicaCount: 2
+
+image:
+  repository: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/acmemall-backend-v4/prd/consumer
+  pullPolicy: IfNotPresent
+
+resources:
+  limits:
+    cpu: 3.0
+    memory: 2.3Gi
+  requests:
+    cpu: 0.4
+    memory: 2.3Gi

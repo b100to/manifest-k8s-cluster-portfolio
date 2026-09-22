@@ -1,0 +1,55 @@
+{{- $common := .Values.commonValues }}
+{{- range $key, $value := .Values.app }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ $.Release.Name }}-{{ $key }}
+  namespace: mall
+  labels:
+    {{- include "acmemall-backend-v4.labels" . | nindent 4 }}
+    tags.datadoghq.com/env: {{ $common.env | quote }}
+spec:
+  successfulJobsHistoryLimit: 0
+  failedJobsHistoryLimit: 1
+  concurrencyPolicy: Forbid
+  schedule: {{ $value.schedule | quote }}
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          {{- with $common.podAnnotations }}
+          annotations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          labels:
+            {{- include "acmemall-backend-v4.templateLabels" . | nindent 12 }}
+            tags.datadoghq.com/env: {{ $common.env | quote }}
+            sidecar.istio.io/inject: "false"
+        spec:
+          initContainers:
+            {{- toYaml $common.initContainers | nindent 14 }}
+          containers:
+          - name: {{ $.Release.Name }}
+            image: "{{ $common.image.name }}:{{ $common.image.tag }}"
+            imagePullPolicy: IfNotPresent
+            command:
+              {{- toYaml $value.command | nindent 14 }}
+            resources:
+              {{- toYaml $common.resources | nindent 14 }}
+            env:
+              {{- include "acmemall-backend-v4.env" . | nindent 16 }}
+            volumeMounts:
+              {{- include "acmemall-backend-v4.volumeMounts" . | nindent 16 }}
+          restartPolicy: OnFailure
+          {{- with $common.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $common.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumes:
+            {{- include "acmemall-backend-v4.volumes" . | nindent 12 }}
+{{- end }}

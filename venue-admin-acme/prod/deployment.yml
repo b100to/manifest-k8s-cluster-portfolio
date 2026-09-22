@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: venue-admin-acme
+spec:
+  replicas: 0
+  revisionHistoryLimit: 4
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: venue-admin-acme
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: venue-admin-acme
+        version: v1.0
+        app.kubernetes.io/name: venue-admin-acme
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - venue-admin-acme
+              topologyKey: "kubernetes.io/hostname"
+      containers:
+        - name: app
+          image: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/venue-admin-acme-prod
+          ports:
+            - containerPort: 8092
+          readinessProbe:
+            httpGet:
+              path: /acme/
+              port: 8092
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod

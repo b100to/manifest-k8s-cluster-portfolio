@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+    name: venue-partner-user-stage
+    labels:
+      app.kubernetes.io/name: venue-partner-user-stage
+spec:
+  ports:
+  - port: 8080
+    name: http  
+    targetPort: 8080
+    nodePort: 30161
+  selector:
+    app.kubernetes.io/name: venue-partner-user-stage
+  type: NodePort

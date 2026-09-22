@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acmemall-backend-rc-worker
+spec:
+  replicas: 1
+  revisionHistoryLimit: 4
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: acmemall-backend-rc-worker
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        ad.datadoghq.com/acmemall-backend-rc-worker.logs: '[{"source":"python"}]'
+      labels:
+        app: acmemall-backend-rc-worker
+        version: v1.0
+        app.kubernetes.io/name: acmemall-backend-rc-worker
+    spec:
+      tolerations:
+        - key: node-group-type
+          operator: Equal
+          value: mall
+          effect: NoSchedule
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-group-type
+                    operator: In
+                    values:
+                      - mall
+      containers:
+        - name: acmemall-backend-rc-worker
+          image: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/acmemall-backend-rc
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: "1"
+              memory: 2Gi
+            limits:
+              cpu: "1"
+              memory: 2Gi
+          args:
+            - "/bin/sh"
+            - "-c"
+            - " celery -A acme worker \
+                --loglevel=info \
+                --concurrency=1 \
+                -Q celery"
+          env:
+            - name: AWS_DEFAULT_REGION
+              value: ap-northeast-2
+            - name: CELERY_BROKER_URL
+              value: redis://acmemall-staging-cache.abcdef.ng.0001.apn2.cache.amazonaws.com:6379/2
+            - name: DJANGO_SETTINGS_MODULE
+              value: acme.settings.staging
+            - name: ACME_ENV
+              value: staging
+            - name: REDIS_CACHE_URL
+              value: redis://acmemall-staging-cache.abcdef.ng.0001.apn2.cache.amazonaws.com:6379/0
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: partner-secret
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: partner-secret
+                  key: AWS_SECRET_ACCESS_KEY
+            # DD ENV
+            - name: DD_ENV
+              value: rc
+            - name: DD_TRACE_ENABLED
+              value: "false"
+            - name: DD_VERSION
+              value: "1"
+            - name: DD_SERVICE
+              value: mall-backend-worker

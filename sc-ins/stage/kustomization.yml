@@ -1,0 +1,8 @@
+resources:
+- deployment.yml
+- service.yml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+images:
+- name: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/sc-ins-stage
+  newTag: "208"

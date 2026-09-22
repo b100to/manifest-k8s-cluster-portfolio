@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acme-recommendation-api-stage
+spec:
+  replicas: 0
+  revisionHistoryLimit: 4
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: acme-recommendation-api-stage
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        ad.datadoghq.com/acme-recommendation-api-stage.logs: '[{"source":"java"}]'
+      labels:
+        app: acme-recommendation-api-stage
+        version: v1.0
+        app.kubernetes.io/name: acme-recommendation-api-stage
+    spec:
+      containers:
+        - name: acme-recommendation-api-stage
+          image: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/acme-recommendation-api-stage
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /recommendation/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: stage
+            # DD ENV
+            - name: DD_ENV
+              value: stage
+            - name: DD_SERVICE
+              value: recommendation-api
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: DD_VERSION
+              value: "1"

@@ -1,0 +1,27 @@
+commonValues:
+  env: dev
+  name: acmemall-backend-v4-batch
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: node-group-type
+                operator: In
+                values:
+                  - mall-v4
+  podAnnotations:
+    admission.datadoghq.com/java-lib.version: "v1.18.2"
+  tolerations:
+    - key: node-group-type
+      operator: Equal
+      value: mall-v4
+      effect: NoSchedule
+  image:
+    name: 111111111111.dkr.ecr.ap-northeast-2.amazonaws.com/acmemall-backend-v4/dev/batch
+    tag: 323000d-2484
+  resources:
+     limits:
+       memory: 1000Mi
+     requests:
+       memory: 1000Mi

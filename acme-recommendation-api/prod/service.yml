@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: acme-recommendation-api-prod
+  labels:
+    app.kubernetes.io/name: acme-recommendation-api-prod
+spec:
+  ports:
+    - port: 8080
+      name: http
+      targetPort: 8080
+      nodePort: 30560
+  selector:
+    app.kubernetes.io/name: acme-recommendation-api-prod
+  type: NodePort

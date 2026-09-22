@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-logger-dev
+  labels:
+    app.kubernetes.io/name: mongo-logger-dev
+spec:
+  ports:
+    - port: 8092
+      name: http
+      targetPort: 8092
+      nodePort: 30232
+  selector:
+    app.kubernetes.io/name: mongo-logger-dev
+  type: NodePort

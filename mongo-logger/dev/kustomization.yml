@@ -1,0 +1,8 @@
+resources:
+- deployment.yml
+- service.yml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+images:
+- name: 111111111111.dkr.ecr.ap-northeast-2.amazonaws.com/mongo-logger-dev
+  newTag: "68"

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  app: mongo-logger-stage
+  name: mongo-logger-stage
+spec:
+  replicas: 0
+  revisionHistoryLimit: 4
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mongo-logger-stage
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mongo-logger-stage
+    spec:
+      containers:
+        - name: app
+          image: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/mongo-logger-stage
+          resources: {}
+          ports:
+            - containerPort: 8092
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8092
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: stage
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: DD_SERVICE
+              value: mongo-logger-stage

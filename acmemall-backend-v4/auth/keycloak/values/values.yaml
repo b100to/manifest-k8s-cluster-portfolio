@@ -1,0 +1,50 @@
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+    name: https
+    type: ClusterIP
+    port: 8443
+
+resources: {}
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations:
+  - key: node-group-type
+    operator: Equal
+    value: mall
+    effect: NoSchedule
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: node-group-type
+              operator: In
+              values:
+                - mall
+
+jvmOpts: >-
+  -XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0
+  -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:8989
+preStopWaitSeconds: 0
+infinispanServerHost: acmemall-backend-v4-auth-infinispan.mall.svc.cluster.local

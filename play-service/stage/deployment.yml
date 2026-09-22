@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: play-service-stage
+spec:
+  replicas: 0
+  revisionHistoryLimit: 4
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: play-service-stage
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        # app: play-service-dev
+        # version: v1.0
+        app.kubernetes.io/name: play-service-stage
+    spec:
+      containers:
+        - name: app
+          image: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/play-service-stage
+          resources: {}
+          ports:
+            - containerPort: 8081
+          readinessProbe:
+            httpGet:
+              path: /whoami
+              port: 8081
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: stage

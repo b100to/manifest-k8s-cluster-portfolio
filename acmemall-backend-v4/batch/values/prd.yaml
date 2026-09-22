@@ -1,0 +1,29 @@
+commonValues:
+  env: prod
+  name: acmemall-backend-v4-batch
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: node-group-type
+                operator: In
+                values:
+                  - mall-v4-batch
+  podAnnotations:
+    karpenter.sh/do-not-evict: "true"
+  tolerations:
+    - key: node-group-type
+      operator: Equal
+      value: mall-v4-batch
+      effect: NoSchedule
+  image:
+    name: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/acmemall-backend-v4/prd/batch
+    tag: 8aeb4dd-2480
+  resources:
+     limits:
+       cpu: 3.0
+       memory: 1500Mi
+     requests:
+       cpu: 0.5
+       memory: 1500Mi

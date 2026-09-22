@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sc-ins
+spec:
+  replicas: 0
+  revisionHistoryLimit: 4
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sc-ins
+  strategy:
+      type: RollingUpdate
+  template:
+    metadata:
+      labels: 
+        app: sc-ins
+        version: v1.0
+        app.kubernetes.io/name: sc-ins
+    spec:
+      containers:
+        - name: sc-ins
+          image: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/sc-ins-prod
+          ports:
+            - containerPort: 8083
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod

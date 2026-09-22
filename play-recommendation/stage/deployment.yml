@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: play-recommendation-stage
+spec:
+  replicas: 0
+  revisionHistoryLimit: 4
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: play-recommendation-stage
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        # app: play-recommendation-stage
+        # version: v1.0
+        app.kubernetes.io/name: play-recommendation-stage
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - play-recommendation-stage
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: app
+          image: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/play-recommendation-stage
+          resources: {}
+          ports:
+            - containerPort: 8090
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8090
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: stage

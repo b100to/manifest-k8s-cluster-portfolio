@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: member-registration-macro-dev
+  labels:
+    app.kubernetes.io/name: member-registration-macro-dev
+spec:
+  ports:
+    - port: 80
+      name: http
+      targetPort: 8081
+      nodePort: 30333
+  selector:
+    app.kubernetes.io/name: member-registration-macro-dev
+  type: NodePort

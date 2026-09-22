@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: venue-partner-user-dev
+spec:
+  replicas: 0
+  revisionHistoryLimit: 4
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: venue-partner-user-dev
+  strategy:
+      type: RollingUpdate
+  template:
+    metadata:
+      labels: 
+        app: venue-partner-user-dev
+        version: v1.0
+        app.kubernetes.io/name: venue-partner-user-dev
+    spec:
+      containers:
+        - name: venue-partner-user-dev
+          image: 111111111111.dkr.ecr.ap-northeast-2.amazonaws.com/venue-partner-user-dev
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /user/
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: dev
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: partner-secret
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: partner-secret
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_DEFAULT_REGION
+              value: ap-northeast-2
+            - name: AWS_REGION
+              value: ap-northeast-2

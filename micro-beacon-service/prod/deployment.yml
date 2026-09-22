@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: micro-beacon-service
+spec:
+  replicas: 0
+  revisionHistoryLimit: 4
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: micro-beacon-service
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: micro-beacon-service
+        version: v1.0
+        app.kubernetes.io/name: micro-beacon-service
+    spec:
+      containers:
+        - name: app
+          image: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/micro-beacon-service-prod
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "768Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8879
+            initialDelaySeconds: 5
+            periodSeconds: 3
+          ports:
+            - containerPort: 8879
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod

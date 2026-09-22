@@ -1,0 +1,16 @@
+---
+environments:
+  dev:
+    kubeContext: mall-dev-1
+  stage:
+    kubeContext: mall-stage-1
+  prod:
+    kubeContext: mall-prod-1
+---
+releases:
+  - name: acmemall-backend-v4-api-admin
+    namespace: mall
+    chart: ./helm
+    version: 0.1.0
+    values:
+      - ./values/{{ .Environment.Name }}.yaml

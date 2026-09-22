@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: partner-django-admin-stage
+  labels:
+    app.kubernetes.io/name: partner-django-admin-stage
+spec:
+  ports:
+  - port: 8000
+    name: http  
+    targetPort: 8000
+    nodePort: 30012
+  selector:
+    app.kubernetes.io/name: partner-django-admin-stage
+  type: NodePort

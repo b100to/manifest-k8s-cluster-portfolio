@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloud-gateway-stage
+spec:
+  replicas: 0
+  revisionHistoryLimit: 4
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cloud-gateway-stage
+  strategy:
+      type: RollingUpdate
+  template:
+    metadata:
+      labels: 
+        app: cloud-gateway-stage
+        version: v1.0
+        app.kubernetes.io/name: cloud-gateway-stage
+    spec:
+      containers:
+        - name: cloud-gateway-stage
+          image: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/cloud-gateway-stage
+          ports:
+            - containerPort: 8088
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8088
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: stage

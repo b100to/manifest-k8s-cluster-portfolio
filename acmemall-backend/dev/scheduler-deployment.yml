@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acmemall-backend-dev-beat
+spec:
+  replicas: 1
+  revisionHistoryLimit: 4
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: acmemall-backend-dev-beat
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        ad.datadoghq.com/acmemall-backend-dev-beat.logs: '[{"source":"python"}]'
+      labels:
+        app: acmemall-backend-dev-beat
+        version: v1.0
+        app.kubernetes.io/name: acmemall-backend-dev-beat
+    spec:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: "kubernetes.io/hostname"
+          whenUnsatisfiable: ScheduleAnyway # 제약조건을 완전히 만족시키지 못하는 경우에도 파드를 스케줄링하도록 함
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: acmemall-backend-dev-beat
+      tolerations:
+        - key: node-group-type
+          operator: Equal
+          value: mall
+          effect: NoSchedule
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-group-type
+                    operator: In
+                    values:
+                      - mall
+      containers:
+        - name: acmemall-backend-dev-beat
+          image: 111111111111.dkr.ecr.ap-northeast-2.amazonaws.com/acmemall-backend-dev
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: 314m
+              memory: 404Mi
+            limits:
+              cpu: 314m
+              memory: 404Mi
+          args:
+            - "/bin/sh"
+            - "-c"
+            - " celery -A acme beat --loglevel=info "
+          env:
+            - name: AWS_DEFAULT_REGION
+              value: ap-northeast-2
+            - name: CELERY_BROKER_URL
+              value: redis://acmemall-alpha-cache-redis.ghijkl.ng.0001.apn2.cache.amazonaws.com:6379/2
+            - name: DJANGO_SETTINGS_MODULE
+              value: acme.settings.alpha
+            - name: ACME_ENV
+              value: alpha
+            - name: REDIS_CACHE_URL
+              value: redis://acmemall-alpha-cache-redis.ghijkl.ng.0001.apn2.cache.amazonaws.com:6379/0
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: partner-secret
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: partner-secret
+                  key: AWS_SECRET_ACCESS_KEY
+            # DD ENV
+            - name: DD_ENV
+              value: dev
+            - name: DD_TRACE_ENABLED
+              value: "false"
+            - name: DD_VERSION
+              value: "1"
+            - name: DD_SERVICE
+              value: mall-backend-scheduler

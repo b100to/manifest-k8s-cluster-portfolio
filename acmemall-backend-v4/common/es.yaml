@@ -1,0 +1,29 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ClusterSecretStore
+metadata:
+  name: acme-auth-css
+spec:
+  provider:
+    aws:
+      service: SecretsManager
+      region: ap-northeast-2
+  conditions:
+    - namespaces:
+        - auth
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: acme-auth-es
+spec:
+  refreshInterval: 1m
+  secretStoreRef:
+    name: acme-auth-css
+    kind: ClusterSecretStore
+  target:
+    name: acme-auth
+    creationPolicy: Owner
+  data:
+    - secretKey: auth
+      remoteRef:
+        key: /secret/auth/dev

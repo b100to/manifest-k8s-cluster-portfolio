@@ -1,0 +1,59 @@
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+securityContext: {}
+
+service:
+  jgroups:
+    name: jgroups
+    type: ClusterIP
+    port: 7800
+  hotrod:
+    name: hotrod
+    type: ClusterIP
+    port: 11333
+
+
+resources:
+  requests:
+    memory: "128Mi"
+    cpu: "100m"
+  limits:
+    memory: "1024Mi"
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations:
+  - key: node-group-type
+    operator: Equal
+    value: mall
+    effect: NoSchedule
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: node-group-type
+              operator: In
+              values:
+                - mall
+
+jvmOpts: >-
+  -XX:InitialRAMPercentage=50.0 -XX:MaxRAMPercentage=75.0
+preStopWaitSeconds: 0

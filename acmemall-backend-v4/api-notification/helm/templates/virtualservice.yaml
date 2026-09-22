@@ -1,0 +1,21 @@
+{{- if .Values.istio.enabled -}}
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ include "acmemall-backend-v4.fullname" . }}
+spec:
+  hosts: {{- toYaml .Values.istio.virtualservice.hosts | nindent 4 }}
+  gateways:
+    - {{ .Values.istio.gateway.name }}
+  http:
+    - match:
+        - uri:
+            prefix: {{ .Values.istio.virtualservice.prefix }}
+      rewrite:
+        uri: /
+      route:
+        - destination:
+            host: {{ include "acmemall-backend-v4.fullname" . }}
+            port:
+              number: {{ .Values.service.port }}
+{{- end }}

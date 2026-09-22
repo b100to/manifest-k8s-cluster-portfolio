@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: acmemall-backend-v4-auth-keycloak
+  namepsace: argocd
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: 111111111111.dkr.ecr.ap-northeast-2.amazonaws.com/acme-auth/dev/keycloak
+    argocd-image-updater.argoproj.io/org_app.pull-secret: ext:/scripts/ecr.sh
+    argocd-image-updater.argoproj.io/write-back-method: argocd
+    argocd-image-updater.argoproj.io/org_app.update-strategy: latest
+    argocd-image-updater.argoproj.io/org_app.platforms: linux/amd64
+spec:
+  destination:
+    name: ''
+    namespace: auth
+
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: acmemall-backend-v4/auth/keycloak
+    repoURL: 'https://github.com/AcmeCorp/manifest-k8s-acme-cluster.git'
+    targetRevision: feat/PROJ-1249
+    helm:
+      valueFiles:
+        - ./values/values.yaml
+        - ./values/dev.yaml
+  project: default
+  syncPolicy:
+    automated:
+      prune: true
+    syncOptions:
+      - CreateNamespace=true

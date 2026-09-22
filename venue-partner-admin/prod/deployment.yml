@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: venue-partner-admin-prod
+spec:
+  replicas: 0
+  revisionHistoryLimit: 4
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: venue-partner-admin-prod
+  strategy:
+      type: RollingUpdate
+  template:
+    metadata:
+      labels: 
+        app: venue-partner-admin-prod
+        version: v1.0
+        app.kubernetes.io/name: venue-partner-admin-prod
+    spec:
+      containers:
+        - name: venue-partner-admin-prod
+          image: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/venue-partner-admin-prod
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "768Mi"
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /admin/
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: prod
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: partner-secret
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: partner-secret
+                  key: AWS_SECRET_ACCESS_KEY

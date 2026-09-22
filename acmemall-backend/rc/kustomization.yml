@@ -1,0 +1,12 @@
+resources:
+- scheduler-deployment.yml
+- worker-deployment.yml
+- excel-worker-deployment.yml
+- deployment.yml
+- service.yml
+apiVersion: kustomize.config.k8s.io/v1beta1
+namespace: mall
+kind: Kustomization
+images:
+- name: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/acmemall-backend-rc
+  newTag: "204"

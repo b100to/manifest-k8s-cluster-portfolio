@@ -1,0 +1,32 @@
+commonValues:
+  env: stage
+  name: acmemall-backend-v4-batch
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: node-group-type
+                operator: In
+                values:
+                  - mall-v4
+  podAnnotations:
+#    admission.datadoghq.com/java-lib.version: "v1.18.2"
+    karpenter.sh/do-not-evict: "true"
+  tolerations:
+    - key: node-group-type
+      operator: Equal
+      value: mall-v4
+      effect: NoSchedule
+  image:
+    name: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/acmemall-backend-v4/stg/batch
+    tag: faa5ed8-2485
+  resources:
+     limits:
+       memory: 0.8Gi
+     requests:
+       memory: 0.8Gi
+#  initContainers:
+#    - name: init-sleeper
+#      image: busybox
+#      command: ["sleep", "60"]

@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: common-user-service-stage
+spec:
+  replicas: 0
+  revisionHistoryLimit: 4
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: common-user-service-stage
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        # app: common-user-service-stage
+        # version: v1.0
+        app.kubernetes.io/name: common-user-service-stage
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - common-user-service-stage
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: app
+          image: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/common-user-service-stage
+          resources: {}
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8871
+            initialDelaySeconds: 15
+            periodSeconds: 5
+          ports:
+            - containerPort: 8871
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: stage

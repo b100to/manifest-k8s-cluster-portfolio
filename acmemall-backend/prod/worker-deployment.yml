@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acmemall-backend-prod-worker
+spec:
+  revisionHistoryLimit: 4
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: acmemall-backend-prod-worker
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        ad.datadoghq.com/acmemall-backend-prod-worker.logs: '[{"source":"python"}]'
+      labels:
+        app: acmemall-backend-prod-worker
+        version: v1.0
+        app.kubernetes.io/name: acmemall-backend-prod-worker
+    spec:
+      tolerations:
+        - key: node-group-type
+          operator: Equal
+          value: worker
+          effect: NoSchedule
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-group-type
+                    operator: In
+                    values:
+                      - worker
+      containers:
+        - name: acmemall-backend-prod-worker
+          image: 222222222222.dkr.ecr.ap-northeast-2.amazonaws.com/acmemall-backend-prod
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: 4
+            limits:
+              cpu: 4
+          args:
+            - "/bin/sh"
+            - "-c"
+            - " celery -A acme worker --loglevel=WARNING --concurrency=9 -Q celery "
+          env:
+            - name: AWS_DEFAULT_REGION
+              value: ap-northeast-2
+            - name: CELERY_BROKER_URL
+              value: redis://acmemall-prod-cache.abcdef.ng.0001.apn2.cache.amazonaws.com:6379/2
+            - name: DJANGO_SETTINGS_MODULE
+              value: acme.settings.prod
+            - name: ACME_ENV
+              value: prod
+            - name: REDIS_CACHE_URL
+              value: redis://acmemall-prod-cache.abcdef.ng.0001.apn2.cache.amazonaws.com:6379/0
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: partner-secret
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: partner-secret
+                  key: AWS_SECRET_ACCESS_KEY
+            # DD ENV
+            - name: DD_ENV
+              value: prod
+            - name: DD_TRACE_ENABLED
+              value: "false"
+            - name: DD_VERSION
+              value: "1"
+            - name: DD_SERVICE
+              value: mall-backend-worker

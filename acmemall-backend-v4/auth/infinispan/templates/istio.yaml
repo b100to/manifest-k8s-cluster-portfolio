@@ -1,0 +1,37 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: acmemall-backend-v4-auth-gw
+  namespace: mall
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - hosts:
+        - auth.dev.acme.example
+      port:
+        name: http
+        number: 80
+        protocol: HTTP
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: acmemall-backend-v4-auth-vs
+  namespace: mall
+spec:
+  gateways:
+    - acmemall-backend-v4-auth-gw
+  hosts:
+    - auth.dev.acme.example
+  http:
+    - match:
+        - uri:
+            prefix: /
+#      rewrite:
+#        uri: /
+      route:
+        - destination:
+            host: acmemall-backend-v4-auth-keycloak
+            port:
+              number: 8443

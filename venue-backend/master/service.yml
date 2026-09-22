@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: venue-backend
+  labels:
+    app.kubernetes.io/name: venue-backend
+spec:
+  ports:
+  - port: 8080
+    name: http  
+    targetPort: 8080
+    nodePort: 30112
+  selector:
+    app.kubernetes.io/name: venue-backend
+  type: NodePort

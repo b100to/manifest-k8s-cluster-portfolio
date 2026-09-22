@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: micro-beacon-service-stage
+spec:
+  destination:
+    name: micro-beacon-service-stage
+    namespace: default
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: micro-beacon-service/stage
+    repoURL: 'git@github.com:AcmeCorp/manifest-k8s-acme-cluster.git'
+    targetRevision: HEAD
+  project: default

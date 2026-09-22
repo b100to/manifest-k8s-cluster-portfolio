@@ -1,0 +1,53 @@
+apiVersion: external-secrets.io/v1beta1
+kind: ClusterSecretStore
+metadata:
+  name: secretstore-sample
+spec:
+  provider:
+    aws:
+      service: SecretsManager
+      region: ap-northeast-2
+  conditions:
+    - namespaces:
+        - auth
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: example
+  namespace: mall
+spec:
+  refreshInterval: 1m
+  secretStoreRef:
+    name: secretstore-sample
+    kind: ClusterSecretStore
+  target:
+    name: auth
+    creationPolicy: Owner
+  data:
+    - secretKey: auth
+      remoteRef:
+        key: /secret/auth/dev
+        property: auth
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: busybox
+  namespace: mall
+spec:
+  containers:
+    - image: busybox:1.35.0
+      command:
+        - sleep
+        - "3600"
+      imagePullPolicy: IfNotPresent
+      name: busybox
+      env:
+        - name: TEST
+          valueFrom:
+            secretKeyRef:
+              name: friends
+              key: test
+  restartPolicy: Never
